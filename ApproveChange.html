@@ -2,7 +2,6 @@
 <html>
 <head>
   <title>Approve Change Request</title>
-  <script src="https://res.cdn.office.net/teams-js/2.22.0/js/MicrosoftTeams.min.js"></script>
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -34,23 +33,23 @@
   </div>
 
   <script>
-    microsoftTeams.app.initialize().then(async () => {
-      const params = new URLSearchParams(window.location.search);
-      const itemId = params.get("itemId");
+    const params = new URLSearchParams(window.location.search);
+    const itemId = params.get("itemId");
 
+    async function submitApproval() {
       try {
-        const context = await microsoftTeams.app.getContext();
-        const userUPN = context.user.loginHint;
-
         const response = await fetch("https://default2b2bb9727e504d82af6d352bddc5bd.b1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/814de963ffe148a2b6540385dd375d10/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BG73NUe_Y8UVxmG3WbKTo_myX7UKRrTQ1g2WheHdA0U", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ itemId: itemId, userUPN: userUPN })
+          body: JSON.stringify({
+            itemId: itemId,
+            userUPN: document.currentScript
+          })
         });
 
         if (response.ok) {
           document.getElementById("title").innerText = "Approval submitted!";
-          setTimeout(() => microsoftTeams.dialog.url.submit(), 2000);
+          setTimeout(() => window.close(), 2000);
         } else {
           document.getElementById("title").innerText = "Something went wrong";
           document.getElementById("status").innerText = "Please try approving directly in the Change Management list.";
@@ -59,7 +58,9 @@
         document.getElementById("title").innerText = "Error";
         document.getElementById("status").innerText = err.message;
       }
-    });
+    }
+
+    submitApproval();
   </script>
 </body>
 </html>
