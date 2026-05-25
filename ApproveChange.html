@@ -24,52 +24,19 @@
       width: 90%;
     }
     h2 { color: #323130; margin-bottom: 8px; }
-    p { color: #605e5c; margin-bottom: 24px; }
-    .btn-confirm {
-      background: #6264a7;
-      color: white;
-      border: none;
-      padding: 12px 32px;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-right: 8px;
-    }
-    .btn-confirm:hover { background: #4f5196; }
-    .btn-cancel {
-      background: white;
-      color: #323130;
-      border: 1px solid #8a8886;
-      padding: 12px 32px;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .btn-cancel:hover { background: #f3f2f1; }
-    .status {
-      margin-top: 16px;
-      color: #605e5c;
-      font-size: 14px;
-    }
+    p { color: #605e5c; margin-bottom: 8px; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>Confirm Approval</h2>
-    <p>You are voting to approve this change request. This will be logged against your name.</p>
-    <button class="btn-confirm" onclick="submitApproval()">✅ Confirm Approval</button>
-    <button class="btn-cancel" onclick="cancel()">Cancel</button>
-    <div class="status" id="status"></div>
+    <h2 id="title">Submitting...</h2>
+    <p id="status"></p>
   </div>
 
   <script>
-    microsoftTeams.app.initialize();
-
-    const params = new URLSearchParams(window.location.search);
-    const itemId = params.get("itemId");
-
-    async function submitApproval() {
-      document.getElementById("status").innerText = "Submitting...";
+    microsoftTeams.app.initialize().then(async () => {
+      const params = new URLSearchParams(window.location.search);
+      const itemId = params.get("itemId");
 
       try {
         const context = await microsoftTeams.app.getContext();
@@ -78,26 +45,21 @@
         const response = await fetch("https://default2b2bb9727e504d82af6d352bddc5bd.b1.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/814de963ffe148a2b6540385dd375d10/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BG73NUe_Y8UVxmG3WbKTo_myX7UKRrTQ1g2WheHdA0U", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            itemId: itemId,
-            userUPN: userUPN
-          })
+          body: JSON.stringify({ itemId: itemId, userUPN: userUPN })
         });
 
         if (response.ok) {
-          document.getElementById("status").innerText = "✅ Approval submitted!";
-          setTimeout(() => microsoftTeams.dialog.url.submit(), 1500);
+          document.getElementById("title").innerText = "Approval submitted!";
+          setTimeout(() => microsoftTeams.dialog.url.submit(), 2000);
         } else {
-          document.getElementById("status").innerText = "Something went wrong. Please try again.";
+          document.getElementById("title").innerText = "Something went wrong";
+          document.getElementById("status").innerText = "Please try approving directly in the Change Management list.";
         }
       } catch (err) {
-        document.getElementById("status").innerText = "Error: " + err.message;
+        document.getElementById("title").innerText = "Error";
+        document.getElementById("status").innerText = err.message;
       }
-    }
-
-    function cancel() {
-      microsoftTeams.dialog.url.submit();
-    }
+    });
   </script>
 </body>
 </html>
